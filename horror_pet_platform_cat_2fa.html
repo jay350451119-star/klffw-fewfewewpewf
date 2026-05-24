@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>冥寵夜話｜恐怖寵物分享平台</title>
+  <style>
+    :root{
+      --bg:#080808; --card:#151111; --card2:#1d1515; --red:#b3122a; --red2:#ff244a;
+      --text:#f3eeee; --muted:#aaa0a0; --line:#3a2020; --shadow:0 0 25px rgba(179,18,42,.22);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:"Microsoft JhengHei", system-ui, sans-serif; color:var(--text);
+      background:
+        radial-gradient(circle at 10% 5%, rgba(179,18,42,.25), transparent 28%),
+        radial-gradient(circle at 90% 0%, rgba(100,0,0,.25), transparent 26%),
+        linear-gradient(135deg,#050505,#120909 45%,#070707);
+      min-height:100vh;
+    }
+    body:before{
+      content:""; position:fixed; inset:0; pointer-events:none; opacity:.09;
+      background-image:repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,255,255,.12) 19px 20px);
+    }
+    nav{
+      position:sticky; top:0; z-index:10; backdrop-filter:blur(10px);
+      display:flex; justify-content:space-between; align-items:center; gap:14px; padding:14px 24px;
+      background:rgba(5,5,5,.86); border-bottom:1px solid var(--line); box-shadow:var(--shadow);
+    }
+    .brand{font-size:24px; font-weight:900; color:#fff; text-shadow:0 0 14px var(--red2)}
+    .navBtns{display:flex; flex-wrap:wrap; gap:10px}
+    button,.btn{
+      border:1px solid #6b1b28; color:#fff; background:linear-gradient(135deg,#621020,#b3122a);
+      padding:10px 16px; border-radius:12px; cursor:pointer; font-weight:800; transition:.2s;
+      box-shadow:0 0 10px rgba(179,18,42,.16);
+    }
+    button:hover,.btn:hover{transform:translateY(-2px); box-shadow:0 0 20px rgba(255,36,74,.35)}
+    .ghost{background:#171212; border-color:#443030}
+    .danger{background:linear-gradient(135deg,#2b0208,#70000f)}
+    main{max-width:1050px; margin:0 auto; padding:28px 16px 70px}
+    .page{display:none}.page.active{display:block}
+    .hero{
+      padding:34px; border:1px solid var(--line); border-radius:24px; background:rgba(18,12,12,.88);
+      box-shadow:var(--shadow); margin-bottom:18px; position:relative; overflow:hidden;
+    }
+    .hero:after{content:"🐾"; position:absolute; right:25px; bottom:-20px; font-size:110px; opacity:.06}
+    h1,h2,h3{margin:0 0 14px} h1{font-size:38px} h2{font-size:28px;color:#fff;text-shadow:0 0 10px rgba(255,36,74,.45)}
+    p{color:var(--muted); line-height:1.7}
+    .grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px}
+    .card{
+      background:linear-gradient(180deg,rgba(29,21,21,.96),rgba(14,10,10,.96)); border:1px solid var(--line);
+      border-radius:20px; padding:20px; box-shadow:0 12px 35px rgba(0,0,0,.28);
+    }
+    label{display:block; margin:12px 0 7px; color:#ddd; font-weight:800}
+    input,textarea{
+      width:100%; border:1px solid #4a2a2a; background:#090707; color:#fff; border-radius:12px;
+      padding:12px 13px; outline:none; font-size:15px;
+    }
+    input:focus,textarea:focus{border-color:var(--red2); box-shadow:0 0 0 3px rgba(255,36,74,.15)}
+    textarea{min-height:120px; resize:vertical}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+    .avatar{width:58px; height:58px; border-radius:50%; object-fit:cover; border:2px solid var(--red); background:#222}
+    .avatar.big{width:92px;height:92px}
+    .meta{color:var(--muted); font-size:14px}
+    .post{margin-bottom:18px}
+    .postImg{width:100%; max-height:390px; object-fit:cover; border-radius:16px; border:1px solid #392020; margin-top:12px}
+    .actions{display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap}
+    .comment{display:flex; gap:10px; padding:10px 0; border-top:1px solid rgba(255,255,255,.08)}
+    .comment .avatar{width:38px;height:38px}
+    .empty{padding:24px; border:1px dashed #583030; border-radius:18px; color:#b8a7a7; text-align:center}
+    .notice{padding:12px 14px; border-radius:14px; background:#210c12; border:1px solid #54202a; color:#ffd7dd; margin:12px 0}
+    .hide{display:none!important}
+
+    .verifyGrid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px}
+    .verifyItem{
+      min-height:120px; border-radius:18px; border:2px solid #3d2525; background:#0b0909;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+      transition:.2s; user-select:none; position:relative; overflow:hidden;
+    }
+    .verifyItem:hover{transform:translateY(-2px); box-shadow:0 0 18px rgba(255,36,74,.25)}
+    .verifyItem.selected{border-color:var(--red2); box-shadow:0 0 0 4px rgba(255,36,74,.18), 0 0 22px rgba(255,36,74,.35)}
+    .verifyEmoji{font-size:52px; line-height:1}
+    .verifyLabel{font-size:13px; color:#c8b8b8; margin-top:8px}
+    .verifyItem.selected:after{
+      content:"✓"; position:absolute; right:10px; top:8px; width:26px; height:26px; border-radius:50%;
+      display:grid; place-items:center; background:var(--red2); color:white; font-weight:900;
+    }
+
+    @media(max-width:760px){
+      nav{align-items:flex-start; flex-direction:column}.grid{grid-template-columns:1fr} h1{font-size:30px}
+      main{padding:20px 12px 60px}.hero{padding:22px}
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="brand" onclick="showPage('feedPage')" style="cursor:pointer">冥寵夜話</div>
+    <div class="navBtns">
+      <button class="ghost" onclick="showPage('feedPage')">分享區</button>
+      <button class="ghost authOnly" onclick="showPage('profilePage')">個人首頁</button>
+      <button class="ghost authOnly" onclick="showPage('createPostPage')">發布貼文</button>
+      <button class="guestOnly" onclick="showPage('loginPage')">登入／註冊</button>
+      <button class="danger authOnly" onclick="logout()">登出</button>
+    </div>
+  </nav>
+
+  <main>
+    <section id="loginPage" class="page">
+      <div class="hero">
+        <h1>歡迎來到冥寵夜話</h1>
+        <p>登入後才能發布冥寵紀錄、按讚與留言。訪客只能觀看所有貼文與留言。</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h2>登入</h2>
+          <label>ID</label>
+          <input id="loginId" placeholder="輸入你的 ID">
+          <label>密碼</label>
+          <input id="loginPassword" type="password" placeholder="輸入密碼">
+          <div class="actions">
+            <button onclick="login()">登入</button>
+            <button class="ghost" onclick="showPage('feedPage')">訪客進入分享區</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>註冊</h2>
+          <label>ID，不可重複</label>
+          <input id="regId" placeholder="例如 pet001">
+          <label>名稱</label>
+          <input id="regName" placeholder="例如 黑貓飼主">
+          <label>密碼</label>
+          <input id="regPassword" type="password" placeholder="設定密碼">
+          <label>上傳頭貼</label>
+          <input id="regAvatar" type="file" accept="image/*">
+          <div class="actions"><button onclick="register()">註冊帳號</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="profilePage" class="page">
+      <div class="hero">
+        <div class="row">
+          <img id="profileAvatar" class="avatar big">
+          <div>
+            <h1 id="profileName">個人首頁</h1>
+            <p id="profileInfo"></p>
+          </div>
+        </div>
+        <div class="actions">
+          <button onclick="showPage('createPostPage')">新增貼文</button>
+          <button class="ghost" onclick="showPage('feedPage')">前往分享區</button>
+        </div>
+      </div>
+      <h2>我的冥寵紀錄</h2>
+      <div id="myPosts"></div>
+    </section>
+
+    <section id="createPostPage" class="page">
+      <div class="card">
+        <h2>發布新的冥寵紀錄</h2>
+        <div class="row">
+          <img id="createAvatar" class="avatar">
+          <div><b id="createName"></b><div class="meta" id="createId"></div></div>
+        </div>
+        <label>發布主題</label>
+        <input id="postTitle" placeholder="例如：午夜聽見貓在空房間叫">
+        <label>發布內容</label>
+        <textarea id="postContent" placeholder="寫下你遇到的詭異寵物事件……"></textarea>
+        <label>上傳照片，可不傳</label>
+        <input id="postImage" type="file" accept="image/*">
+        <div class="actions">
+          <button onclick="createPost()">發布</button>
+          <button class="ghost" onclick="showPage('profilePage')">返回個人首頁</button>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="verifyPage" class="page">
+      <div class="hero">
+        <h1>九宮格貓咪雙重認證</h1>
+        <p>請選出所有「貓咪」圖片，才能完成登入。選錯或少選都無法通過。</p>
+        <div class="notice" id="verifyHint">登入驗證中：請點選所有貓咪。</div>
+      </div>
+      <div class="card">
+        <h2>選出所有貓咪</h2>
+        <div id="catGrid" class="verifyGrid"></div>
+        <div class="actions">
+          <button onclick="checkCatVerify()">確認驗證</button>
+          <button class="ghost" onclick="cancelVerify()">取消登入</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="feedPage" class="page">
+      <div class="hero">
+        <h1>分享區</h1>
+        <p id="identityText">目前身份：迷路的訪客</p>
+        <div class="actions">
+          <button class="authOnly" onclick="showPage('profilePage')">回個人首頁</button>
+          <button class="guestOnly" onclick="showPage('loginPage')">登入／註冊</button>
+        </div>
+      </div>
+      <div id="feedPosts"></div>
+    </section>
+  </main>
+
+<script>
+const LS_USERS = "horror_pet_users_v2";
+const LS_POSTS = "horror_pet_posts_v2";
+const LS_CURRENT = "horror_pet_current_user_v2";
+
+let users = JSON.parse(localStorage.getItem(LS_USERS) || "[]");
+let posts = JSON.parse(localStorage.getItem(LS_POSTS) || "[]");
+let currentUser = JSON.parse(localStorage.getItem(LS_CURRENT) || "null");
+let pendingLoginUser = null;
+let selectedVerifyIds = [];
+
+const defaultAvatar = "data:image/svg+xml;utf8," + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+<rect width="100%" height="100%" fill="#16080c"/>
+<circle cx="60" cy="58" r="38" fill="#b3122a"/>
+<circle cx="46" cy="52" r="5" fill="#fff"/>
+<circle cx="74" cy="52" r="5" fill="#fff"/>
+<path d="M42 76 Q60 88 78 76" stroke="#fff" stroke-width="5" fill="none"/>
+</svg>`);
+
+function saveAll(){
+  localStorage.setItem(LS_USERS, JSON.stringify(users));
+  localStorage.setItem(LS_POSTS, JSON.stringify(posts));
+  localStorage.setItem(LS_CURRENT, JSON.stringify(currentUser));
+}
+
+function seedPosts(){
+  if(posts.length) return;
+  posts = [
+    {
+      postId: Date.now()+1, authorId:"ghostcat", authorName:"黑貓守夜人", authorAvatar:defaultAvatar,
+      title:"午夜聽見貓在空房間叫", content:"我家的貓盯著沒人的房間一直低吼，門縫裡還傳出抓牆聲。",
+      image:"", time:"2026/05/18 00:13", likes:3, likedBy:[], comments:[
+        {userId:"visitor",userName:"路過的人",userAvatar:defaultAvatar,text:"我家貓也會盯著牆角看，真的很毛。",time:"2026/05/18 00:20"}
+      ]
+    },
+    {
+      postId: Date.now()+2, authorId:"blackdog", authorName:"門口黑狗", authorAvatar:defaultAvatar,
+      title:"黑狗盯著門口不動", content:"凌晨三點，狗突然坐在門口，對著門外搖尾巴，但監視器什麼都沒有。",
+      image:"", time:"2026/05/18 03:07", likes:5, likedBy:[], comments:[]
+    },
+    {
+      postId: Date.now()+3, authorId:"shadowpet", authorName:"無影飼主", authorAvatar:defaultAvatar,
+      title:"撿到一隻沒有影子的貓", content:"白天牠很正常，但我發現陽光照在牠身上時，地上完全沒有影子。",
+      image:"", time:"2026/05/18 04:44", likes:8, likedBy:[], comments:[
+        {userId:"ghostcat",userName:"黑貓守夜人",userAvatar:defaultAvatar,text:"這隻可能不是貓。",time:"2026/05/18 04:50"}
+      ]
+    }
+  ];
+  saveAll();
+}
+
+function showPage(id){
+  if((id === "profilePage" || id === "createPostPage") && !currentUser){
+    alert("請先登入，才能進入這個頁面。");
+    id = "loginPage";
+  }
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  updateNav();
+  if(id === "profilePage") renderProfile();
+  if(id === "createPostPage") renderCreateUser();
+  if(id === "feedPage") renderFeed();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function updateNav(){
+  document.querySelectorAll(".authOnly").forEach(el => el.classList.toggle("hide", !currentUser));
+  document.querySelectorAll(".guestOnly").forEach(el => el.classList.toggle("hide", !!currentUser));
+}
+
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    if(!file) return resolve("");
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function register(){
+  const id = document.getElementById("regId").value.trim();
+  const name = document.getElementById("regName").value.trim();
+  const password = document.getElementById("regPassword").value;
+  const avatarFile = document.getElementById("regAvatar").files[0];
+
+  if(!id || !name || !password){ alert("ID、名稱、密碼都要填寫。"); return; }
+  if(users.some(u => u.id === id)){ alert("這個 ID 已經被註冊，請換一個。"); return; }
+
+  const avatar = await fileToBase64(avatarFile) || defaultAvatar;
+  users.push({id, name, password, avatar});
+  saveAll();
+
+  alert("註冊成功，現在可以用剛剛的 ID 和密碼登入。");
+
+  document.getElementById("loginId").value = id;
+  document.getElementById("loginPassword").value = "";
+  document.getElementById("regId").value = "";
+  document.getElementById("regName").value = "";
+  document.getElementById("regPassword").value = "";
+  document.getElementById("regAvatar").value = "";
+  showPage("loginPage");
+}
+
+function login(){
+  users = JSON.parse(localStorage.getItem(LS_USERS) || "[]");
+  const id = document.getElementById("loginId").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  const found = users.find(u => u.id === id && u.password === password);
+  if(!found){ alert("帳號或密碼錯誤，請重新確認。"); return; }
+
+  pendingLoginUser = {id: found.id, name: found.name, avatar: found.avatar};
+  selectedVerifyIds = [];
+  buildCatVerify();
+  showPage("verifyPage");
+}
+
+
+const verifyItems = [
+  {id:"v1", emoji:"🐈", label:"黑夜貓", isCat:true},
+  {id:"v2", emoji:"🐕", label:"守門犬", isCat:false},
+  {id:"v3", emoji:"🐈‍⬛", label:"黑貓", isCat:true},
+  {id:"v4", emoji:"🦉", label:"夜梟", isCat:false},
+  {id:"v5", emoji:"😺", label:"笑臉貓", isCat:true},
+  {id:"v6", emoji:"🐇", label:"白兔", isCat:false},
+  {id:"v7", emoji:"😼", label:"怪笑貓", isCat:true},
+  {id:"v8", emoji:"🐁", label:"老鼠", isCat:false},
+  {id:"v9", emoji:"😿", label:"哭哭貓", isCat:true}
+];
+
+function buildCatVerify(){
+  selectedVerifyIds = [];
+  const shuffled = [...verifyItems].sort(() => Math.random() - 0.5);
+  const grid = document.getElementById("catGrid");
+  grid.innerHTML = shuffled.map(item => `
+    <div class="verifyItem" id="verify-${item.id}" onclick="toggleVerify('${item.id}')">
+      <div class="verifyEmoji">${item.emoji}</div>
+      <div class="verifyLabel">${item.label}</div>
+    </div>
+  `).join("");
+}
+
+function toggleVerify(id){
+  const box = document.getElementById("verify-" + id);
+  if(selectedVerifyIds.includes(id)){
+    selectedVerifyIds = selectedVerifyIds.filter(x => x !== id);
+    box.classList.remove("selected");
+  }else{
+    selectedVerifyIds.push(id);
+    box.classList.add("selected");
+  }
+}
+
+function checkCatVerify(){
+  if(!pendingLoginUser){
+    alert("登入驗證已失效，請重新登入。");
+    showPage("loginPage");
+    return;
+  }
+
+  const correctIds = verifyItems.filter(x => x.isCat).map(x => x.id).sort();
+  const selectedIds = [...selectedVerifyIds].sort();
+  const pass = correctIds.length === selectedIds.length && correctIds.every((id, i) => id === selectedIds[i]);
+
+  if(!pass){
+    alert("驗證失敗：請只選出所有貓咪圖片。");
+    selectedVerifyIds = [];
+    buildCatVerify();
+    return;
+  }
+
+  currentUser = pendingLoginUser;
+  pendingLoginUser = null;
+  saveAll();
+  alert("雙重認證成功，歡迎回到冥寵夜話。");
+  showPage("profilePage");
+}
+
+function cancelVerify(){
+  pendingLoginUser = null;
+  selectedVerifyIds = [];
+  alert("已取消登入。");
+  showPage("loginPage");
+}
+
+
+function logout(){
+  currentUser = null;
+  localStorage.removeItem(LS_CURRENT);
+  updateNav();
+  alert("已登出。");
+  showPage("feedPage");
+}
+
+function renderProfile(){
+  if(!currentUser) return showPage("loginPage");
+  document.getElementById("profileAvatar").src = currentUser.avatar || defaultAvatar;
+  document.getElementById("profileName").textContent = currentUser.name;
+  document.getElementById("profileInfo").textContent = "ID：" + currentUser.id;
+
+  const mine = posts.filter(p => p.authorId === currentUser.id).sort((a,b)=>b.postId-a.postId);
+  const box = document.getElementById("myPosts");
+  if(!mine.length){
+    box.innerHTML = `<div class="empty">你尚未留下任何冥寵紀錄……</div>`;
+    return;
+  }
+  box.innerHTML = mine.map(postCard).join("");
+}
+
+function renderCreateUser(){
+  if(!currentUser) return showPage("loginPage");
+  document.getElementById("createAvatar").src = currentUser.avatar || defaultAvatar;
+  document.getElementById("createName").textContent = currentUser.name;
+  document.getElementById("createId").textContent = "ID：" + currentUser.id;
+}
+
+async function createPost(){
+  if(!currentUser){ alert("請先登入。"); return showPage("loginPage"); }
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const imgFile = document.getElementById("postImage").files[0];
+  if(!title || !content){ alert("發布主題與內容不能空白。"); return; }
+
+  const image = await fileToBase64(imgFile);
+  posts.unshift({
+    postId: Date.now(),
+    authorId: currentUser.id,
+    authorName: currentUser.name,
+    authorAvatar: currentUser.avatar || defaultAvatar,
+    title, content, image,
+    time: new Date().toLocaleString("zh-TW"),
+    likes: 0,
+    likedBy: [],
+    comments: []
+  });
+  saveAll();
+
+  document.getElementById("postTitle").value = "";
+  document.getElementById("postContent").value = "";
+  document.getElementById("postImage").value = "";
+  alert("你的冥寵紀錄已被封存……");
+  showPage("profilePage");
+}
+
+function renderFeed(){
+  document.getElementById("identityText").textContent = currentUser ? `目前身份：${currentUser.name}（${currentUser.id}）` : "目前身份：迷路的訪客";
+  document.getElementById("feedPosts").innerHTML = posts.sort((a,b)=>b.postId-a.postId).map(postCard).join("");
+}
+
+function postCard(p){
+  const liked = currentUser && p.likedBy && p.likedBy.includes(currentUser.id);
+  const comments = (p.comments || []).map(c => `
+    <div class="comment">
+      <img class="avatar" src="${c.userAvatar || defaultAvatar}">
+      <div>
+        <b>${escapeHtml(c.userName)} <span class="meta">(${escapeHtml(c.userId)})</span></b>
+        <div>${escapeHtml(c.text)}</div>
+        <div class="meta">${escapeHtml(c.time)}</div>
+      </div>
+    </div>`).join("") || `<div class="meta">目前沒有留言。</div>`;
+
+  const commentBox = currentUser ? `
+    <div class="row" style="margin-top:10px">
+      <input id="comment-${p.postId}" placeholder="留下你的靈異寵物目擊紀錄……">
+      <button onclick="addComment(${p.postId})">送出留言</button>
+    </div>` : `
+    <div class="notice" onclick="needLogin()" style="cursor:pointer">訪客只能查看留言，登入後才能留言。</div>`;
+
+  return `
+    <article class="card post">
+      <div class="row">
+        <img class="avatar" src="${p.authorAvatar || defaultAvatar}">
+        <div>
+          <b>${escapeHtml(p.authorName)} <span class="meta">(${escapeHtml(p.authorId)})</span></b>
+          <div class="meta">${escapeHtml(p.time)}</div>
+        </div>
+      </div>
+      <h2 style="margin-top:16px">${escapeHtml(p.title)}</h2>
+      <p>${escapeHtml(p.content)}</p>
+      ${p.image ? `<img class="postImg" src="${p.image}">` : ""}
+      <div class="actions">
+        <button class="${liked ? "" : "ghost"}" onclick="toggleLike(${p.postId})">${liked ? "🩸 已喚醒" : "🩸 按讚"} ${p.likes || 0}</button>
+        <button class="ghost" onclick="${currentUser ? `focusComment(${p.postId})` : `needLogin()`}">💬 評論 ${(p.comments || []).length}</button>
+      </div>
+      <h3 style="margin-top:18px">留言</h3>
+      <div>${comments}</div>
+      ${commentBox}
+    </article>`;
+}
+
+function toggleLike(postId){
+  if(!currentUser) return needLogin();
+  const p = posts.find(x => x.postId === postId);
+  if(!p) return;
+  p.likedBy = p.likedBy || [];
+  if(p.likedBy.includes(currentUser.id)){
+    p.likedBy = p.likedBy.filter(id => id !== currentUser.id);
+  }else{
+    p.likedBy.push(currentUser.id);
+  }
+  p.likes = p.likedBy.length;
+  saveAll();
+  renderFeed();
+}
+
+function addComment(postId){
+  if(!currentUser) return needLogin();
+  const input = document.getElementById("comment-" + postId);
+  const text = input.value.trim();
+  if(!text){ alert("留言不能空白。"); return; }
+  const p = posts.find(x => x.postId === postId);
+  p.comments = p.comments || [];
+  p.comments.push({
+    userId: currentUser.id,
+    userName: currentUser.name,
+    userAvatar: currentUser.avatar || defaultAvatar,
+    text,
+    time: new Date().toLocaleString("zh-TW")
+  });
+  saveAll();
+  renderFeed();
+}
+
+function focusComment(postId){
+  const el = document.getElementById("comment-" + postId);
+  if(el) el.focus();
+}
+
+function needLogin(){
+  alert("是否有平台帳號？登入後才能進行按讚或留言。");
+  showPage("loginPage");
+}
+
+function escapeHtml(text){
+  return String(text ?? "").replace(/[&<>"']/g, m => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
+
+seedPosts();
+updateNav();
+showPage(currentUser ? "profilePage" : "feedPage");
+</script>
+</body>
+</html>
